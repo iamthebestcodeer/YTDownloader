@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "uniwind";
+@import "heroui-native/styles";
+
+@source "./node_modules/heroui-native/lib";
+
+@layer theme {
+	:root {
+		@variant light {
+			--accent: hsl(3, 76%, 52%);
+		}
+
+		@variant dark {
+			--accent: hsl(3, 82%, 60%);
+		}
+	}
+}
