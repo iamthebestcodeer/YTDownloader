@@ -89,6 +89,26 @@ describe("playlists", () => {
 	});
 });
 
+describe("playlist item selection", () => {
+	test("downloads only the picked positions", () => {
+		const args = buildDownloadArgs({
+			...BASE_OPTIONS,
+			includePlaylist: true,
+			playlistItems: [1, 3, 7],
+		});
+		expect(valueAfter(args, "--playlist-items")).toBe("1,3,7");
+	});
+
+	test("downloads everything when nothing was narrowed down", () => {
+		expect(buildDownloadArgs({ ...BASE_OPTIONS, includePlaylist: true })).not.toContain(
+			"--playlist-items",
+		);
+		expect(
+			buildDownloadArgs({ ...BASE_OPTIONS, includePlaylist: false, playlistItems: [2] }),
+		).not.toContain("--playlist-items");
+	});
+});
+
 describe("buildSearchRequest", () => {
 	test("uses the ytsearch pseudo-URL", () => {
 		expect(buildSearchRequest("  lofi beats ", 20).target).toBe("ytsearch20:lofi beats");

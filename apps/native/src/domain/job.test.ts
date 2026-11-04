@@ -1,6 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { isActive, isFinished, overallProgress, recoverAfterRestart } from "./job";
+import {
+	isActive,
+	isFinished,
+	overallProgress,
+	recoverAfterRestart,
+	thumbnailForFile,
+	videoIdFromFileName,
+} from "./job";
 import type { DownloadJob } from "./types";
 
 const JOB: DownloadJob = {
@@ -67,5 +74,36 @@ describe("recoverAfterRestart", () => {
 	test("leaves other jobs untouched", () => {
 		const queued = { ...JOB, status: "queued" as const };
 		expect(recoverAfterRestart(queued)).toBe(queued);
+	});
+});
+
+describe("per-file thumbnails", () => {
+	const file = (name: string) => ({
+		uri: "content://1",
+		name,
+		mimeType: "video/mp4",
+		sizeBytes: 1,
+	});
+
+	test("reads the video id back from the file name", () => {
+		expect(videoIdFromFileName("003 - Triangle Choke Song [IORFphvIxCI].mp4")).toBe("IORFphvIxCI");
+		expect(videoIdFromFileName("clip [clip].mp4")).toBeNull();
+	});
+
+	test("uses each video's own YouTube thumbnail", () => {
+		const job = {
+			...JOB,
+			url: "https://www.youtube.com/playlist?list=PL1",
+			thumbnailUrl: "playlist.jpg",
+		};
+		expect(thumbnailForFile(file("a [IORFphvIxCI].mp3"), job)).toBe(
+			"https://i.ytimg.com/vi/IORFphvIxCI/mqdefault.jpg",
+		);
+		expect(thumbnailForFile(file("notes.txt"), job)).toBe("playlist.jpg");
+	});
+
+	test("falls back to the job artwork for other sites", () => {
+		const job = { ...JOB, url: "https://example.com/v.mp4", thumbnailUrl: "art.jpg" };
+		expect(thumbnailForFile(file("v [abcdefghijk].mp4"), job)).toBe("art.jpg");
 	});
 });

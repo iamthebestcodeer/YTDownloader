@@ -9,7 +9,8 @@ const AUDIO_FORMATS_WITH_COVER_ART: ReadonlySet<AudioFormat> = new Set(["mp3", "
 
 /** Arguments for `yt-dlp --dump-single-json`, used to preview a link before downloading. */
 export function buildInfoArgs(): string[] {
-	return ["--dump-single-json", "--flat-playlist", "--no-warnings"];
+	// A client that only returns metadata still gives a usable preview.
+	return ["--dump-single-json", "--flat-playlist", "--no-warnings", "--ignore-no-formats-error"];
 }
 
 /** Target and arguments for a YouTube search returning [limit] results. */
@@ -35,6 +36,7 @@ export function buildDownloadArgs(options: DownloadOptions): string[] {
 function commonArgs(options: DownloadOptions): string[] {
 	return [
 		options.includePlaylist ? "--yes-playlist" : "--no-playlist",
+		...playlistItemArgs(options),
 		"--output",
 		options.includePlaylist ? PLAYLIST_FILE_TEMPLATE : SINGLE_FILE_TEMPLATE,
 		"--no-mtime",
@@ -46,6 +48,11 @@ function commonArgs(options: DownloadOptions): string[] {
 		"--concurrent-fragments",
 		"4",
 	];
+}
+
+function playlistItemArgs(options: DownloadOptions): string[] {
+	if (!options.includePlaylist || !options.playlistItems?.length) return [];
+	return ["--playlist-items", options.playlistItems.join(",")];
 }
 
 function audioArgs(options: DownloadOptions): string[] {

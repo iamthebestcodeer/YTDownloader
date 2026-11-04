@@ -3,7 +3,7 @@ import { type ReactNode, useCallback, useMemo } from "react";
 import { View } from "react-native";
 
 import { isFinished } from "@/src/domain/job";
-import type { DownloadJob } from "@/src/domain/types";
+import type { DownloadedFile, DownloadJob } from "@/src/domain/types";
 import { engine } from "@/src/engine";
 import { useDownloadsStore } from "@/src/store/downloads-store";
 import { downloadQueue } from "@/src/store/queue";
@@ -78,10 +78,8 @@ function JobList({ title, jobs, actions, headerAction }: JobListProps) {
 function useJobActions(): DownloadCardActions {
 	const { toast } = useToast();
 
-	const onOpen = useCallback(
-		(job: DownloadJob) => {
-			const [file] = job.files;
-			if (!file) return;
+	const onOpenFile = useCallback(
+		(file: DownloadedFile) => {
 			try {
 				engine.openFile(file);
 			} catch {
@@ -96,8 +94,8 @@ function useJobActions(): DownloadCardActions {
 			onPause: (job: DownloadJob) => downloadQueue.pause(job.id),
 			onResume: (job: DownloadJob) => downloadQueue.resume(job.id),
 			onRemove: (job: DownloadJob) => downloadQueue.remove(job.id),
-			onOpen,
+			onOpenFile,
 		}),
-		[onOpen],
+		[onOpenFile],
 	);
 }

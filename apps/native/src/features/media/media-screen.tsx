@@ -22,7 +22,7 @@ import { DownloadOptionsForm } from "../download-options/download-options-form";
 import { showDownloads } from "../navigation";
 import { planDownload } from "./download-plan";
 import { MediaHeader } from "./media-header";
-import { PlaylistEntries } from "./playlist-entries";
+import { PlaylistPicker } from "./playlist-picker";
 
 const fetchInfo = (url: string) => engine.fetchInfo(url);
 
@@ -80,18 +80,22 @@ function MediaDetails({ info, requestedUrl }: { info: MediaInfo; requestedUrl: s
 
 	const startDownload = useCallback(() => {
 		// A quick double tap would otherwise queue the same download twice.
-		if (hasStarted.current) return;
+		if (hasStarted.current || !plan.canDownload) return;
 		hasStarted.current = true;
 		enqueue({
 			url: plan.url,
-			title: plan.title,
-			thumbnailUrl: plan.thumbnailUrl,
-			options: { ...options, includePlaylist: plan.includePlaylist },
+			title: plan.preview.title,
+			thumbnailUrl: plan.preview.thumbnailUrl,
+			options: {
+				...options,
+				includePlaylist: plan.includePlaylist,
+				playlistItems: plan.playlistItems,
+			},
 		});
 		toast.show({
 			variant: "success",
 			label: "Added to downloads",
-			description: plan.title,
+			description: plan.preview.title,
 		});
 		showDownloads();
 	}, [enqueue, options, plan, toast]);
@@ -101,7 +105,7 @@ function MediaDetails({ info, requestedUrl }: { info: MediaInfo; requestedUrl: s
 			className="border-separator bg-background border-t px-4 pt-3"
 			style={{ paddingBottom: insets.bottom + 12 }}
 		>
-			<Button size="lg" onPress={startDownload}>
+			<Button size="lg" onPress={startDownload} isDisabled={!plan.canDownload}>
 				{plan.buttonLabel}
 			</Button>
 		</View>
@@ -109,7 +113,7 @@ function MediaDetails({ info, requestedUrl }: { info: MediaInfo; requestedUrl: s
 
 	return (
 		<Screen footer={footer}>
-			<MediaHeader info={info} />
+			<MediaHeader preview={plan.preview} />
 			{canChoosePlaylist ? (
 				<Card className="p-4">
 					<ToggleRow
@@ -123,7 +127,11 @@ function MediaDetails({ info, requestedUrl }: { info: MediaInfo; requestedUrl: s
 				</Card>
 			) : null}
 			{info.kind === "playlist" && plan.includePlaylist ? (
-				<PlaylistEntries entries={info.entries} />
+				<PlaylistPicker
+					entries={info.entries}
+					selection={options.playlistItems}
+					onChange={(playlistItems) => setOptions((current) => ({ ...current, playlistItems }))}
+				/>
 			) : null}
 			<DownloadOptionsForm
 				options={options}

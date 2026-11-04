@@ -2,6 +2,7 @@ import playlistFixture from "@/src/domain/__fixtures__/playlist.json";
 import searchFixture from "@/src/domain/__fixtures__/search.json";
 import videoFixture from "@/src/domain/__fixtures__/video.json";
 import { parseMediaInfo, parseSearchResults } from "@/src/domain/media-info";
+import type { DownloadedFile, DownloadOptions } from "@/src/domain/types";
 import { isVideoInsidePlaylist } from "@/src/domain/url";
 
 import type { DownloadEngine, EngineProgress } from "./download-engine";
@@ -54,15 +55,7 @@ export function createPreviewEngine(): DownloadEngine {
 					if (percent < 100) return;
 					clearInterval(timer);
 					simulations.delete(jobId);
-					const extension = options.kind === "audio" ? options.audioFormat : options.videoContainer;
-					resolve([
-						{
-							uri: "preview://file",
-							name: `preview.${extension}`,
-							mimeType: "video/mp4",
-							sizeBytes: PREVIEW_FILE_BYTES,
-						},
-					]);
+					resolve(previewFiles(options));
 				}, TICK_MS);
 				simulations.set(jobId, { timer, reject });
 			}),
@@ -83,4 +76,21 @@ export function createPreviewEngine(): DownloadEngine {
 			return () => listeners.delete(listener);
 		},
 	};
+}
+
+/** Pretend files named the way the real yt-dlp output template names them. */
+function previewFiles(options: DownloadOptions): DownloadedFile[] {
+	const extension = options.kind === "audio" ? options.audioFormat : options.videoContainer;
+	const mimeType = options.kind === "audio" ? "audio/mpeg" : "video/mp4";
+	const playlist = parseMediaInfo(JSON.stringify(playlistFixture), "");
+	const entries =
+		options.includePlaylist && playlist.kind === "playlist"
+			? playlist.entries.filter((_, index) => options.playlistItems?.includes(index + 1) ?? true)
+			: [parseMediaInfo(JSON.stringify(videoFixture), "")];
+	return entries.map((entry, index) => ({
+		uri: `preview://file/${index}`,
+		name: `${String(index + 1).padStart(3, "0")} - ${entry.title} [${entry.id}].${extension}`,
+		mimeType,
+		sizeBytes: PREVIEW_FILE_BYTES,
+	}));
 }

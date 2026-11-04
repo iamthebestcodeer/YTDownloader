@@ -17,6 +17,8 @@ export type DownloadOptions = {
 	embedMetadata: boolean;
 	embedSubtitles: boolean;
 	subtitleLanguages: string;
+	/** 1-based positions of the playlist videos to download; all of them when absent. */
+	playlistItems?: readonly number[];
 };
 
 export type VideoSummary = {

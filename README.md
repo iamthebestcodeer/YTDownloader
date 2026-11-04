@@ -13,6 +13,11 @@ Built with Expo, React Native, HeroUI Native and Uniwind (scaffolded with
 - **Video** up to 4K in MP4 or MKV, with an estimated file size for each quality.
 - **Audio only** as MP3, M4A or Opus.
 - **Embedded extras:** metadata, cover art and subtitles.
+- **Playlist picker:** every video is listed with its thumbnail; tick the ones to download.
+- **File picker:** a finished playlist lists every file with its own thumbnail; tap one to open it.
+- **Rotating YouTube clients:** when YouTube refuses a request ("confirm you're not a bot",
+  missing formats, 403/429), yt-dlp is retried as a different YouTube client and the one that
+  worked is tried first next time.
 - **Download queue** with progress, speed and time left. You can pause, resume, retry or cancel, and choose how many downloads run at once.
 - **Background downloads:** a foreground service keeps them going when you leave the app.
 - **Update yt-dlp** from the settings screen when a site changes.
