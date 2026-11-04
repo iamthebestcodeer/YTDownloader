@@ -46,6 +46,13 @@ export class DownloadQueue {
 		this.engine.discard(id);
 	}
 
+	/** Forgets finished jobs; failed ones may have left partial files behind. */
+	clearFinished(): void {
+		const failed = useDownloadsStore.getState().jobs.filter((job) => job.status === "failed");
+		useDownloadsStore.getState().clearFinished();
+		for (const job of failed) this.engine.discard(job.id);
+	}
+
 	private stop(id: string): void {
 		if (this.running.has(id)) this.stopRequested.add(id);
 		this.engine.stop(id);

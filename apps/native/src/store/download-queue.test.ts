@@ -175,6 +175,19 @@ describe("DownloadQueue", () => {
 		expect(fake.started).toEqual([id, id]);
 	});
 
+	test("clearing finished jobs discards the partial files of failed ones", async () => {
+		const done = enqueue("done");
+		const broken = enqueue("broken");
+		fake.finish(done);
+		fake.failWith(broken, "ERROR: nope");
+		await flush();
+
+		queue.clearFinished();
+
+		expect(useDownloadsStore.getState().jobs).toHaveLength(0);
+		expect(fake.discarded).toEqual([broken]);
+	});
+
 	test("removing a job stops it and deletes its partial files", async () => {
 		const id = enqueue("unwanted");
 		queue.remove(id);

@@ -1,5 +1,5 @@
 import { Button, Card, Spinner, useToast } from "heroui-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -76,7 +76,12 @@ function MediaDetails({ info, requestedUrl }: { info: MediaInfo; requestedUrl: s
 	const choices = info.kind === "video" ? qualityChoices(info.qualities) : STANDARD_QUALITY_CHOICES;
 	const canChoosePlaylist = info.kind === "playlist" && isVideoInsidePlaylist(requestedUrl);
 
+	const hasStarted = useRef(false);
+
 	const startDownload = useCallback(() => {
+		// A quick double tap would otherwise queue the same download twice.
+		if (hasStarted.current) return;
+		hasStarted.current = true;
 		enqueue({
 			url: plan.url,
 			title: plan.title,

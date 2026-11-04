@@ -81,7 +81,12 @@ class YtDlpEngine(private val context: Context) {
   /**
    * Arguments arrive as a flat command-line list ("--flag", "value", "--switch").
    * They are passed through verbatim, so the JavaScript side owns their meaning.
+   * The library appends the URL last; "--" stops yt-dlp from reading it as an option.
    */
   private fun YoutubeDLRequest.withArguments(arguments: List<String>): YoutubeDLRequest =
-    apply { addCommands(arguments) }
+    apply { addCommands(arguments + END_OF_OPTIONS) }
+
+  private companion object {
+    const val END_OF_OPTIONS = "--"
+  }
 }

@@ -15,7 +15,6 @@ import { DownloadCard, type DownloadCardActions } from "./download-card";
 
 export function DownloadsScreen() {
 	const jobs = useDownloadsStore((store) => store.jobs);
-	const clearFinished = useDownloadsStore((store) => store.clearFinished);
 	const actions = useJobActions();
 
 	const { current, finished } = useMemo(
@@ -47,7 +46,7 @@ export function DownloadsScreen() {
 					jobs={finished}
 					actions={actions}
 					headerAction={
-						<Button size="sm" variant="ghost" onPress={clearFinished}>
+						<Button size="sm" variant="ghost" onPress={() => downloadQueue.clearFinished()}>
 							Clear
 						</Button>
 					}

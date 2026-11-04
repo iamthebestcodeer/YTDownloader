@@ -19,6 +19,8 @@ jobs:
       HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
@@ -52,9 +54,19 @@ jobs:
           fi
           ./gradlew assembleRelease
 
+      # A debug-signed APK could never be updated by a properly signed one, so only
+      # publish when the signing secrets exist; otherwise keep the APK as a build artifact.
       - name: Publish GitHub release
+        if: ${{ env.HAS_KEYSTORE == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v2.0.${{ github.run_number }}
           name: YTDownloader 2.0.${{ github.run_number }}
           files: apps/native/android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Keep unsigned build as an artifact
+        if: ${{ env.HAS_KEYSTORE != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ytdownloader-debug-signed-apk
+          path: apps/native/android/app/build/outputs/apk/release/app-release.apk

@@ -47,7 +47,9 @@ describe("buildDownloadArgs for video", () => {
 			subtitleLanguages: "de.*",
 		});
 		expect(args).toContain("--embed-subs");
+		expect(args).toContain("--write-auto-subs");
 		expect(valueAfter(args, "--sub-langs")).toBe("de.*");
+		expect(valueAfter(args, "--compat-options")).toBe("no-keep-subs");
 	});
 });
 

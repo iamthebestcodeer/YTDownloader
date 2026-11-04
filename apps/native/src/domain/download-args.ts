@@ -75,9 +75,21 @@ function videoArgs(options: DownloadOptions): string[] {
 	];
 }
 
+/**
+ * Requests uploaded and auto-generated captions and embeds them. yt-dlp keeps the
+ * separate subtitle files when --write-subs is given, unless no-keep-subs is set.
+ */
 function subtitleArgs(options: DownloadOptions): string[] {
 	if (!options.embedSubtitles) return [];
-	return ["--write-subs", "--sub-langs", options.subtitleLanguages, "--embed-subs"];
+	return [
+		"--write-subs",
+		"--write-auto-subs",
+		"--sub-langs",
+		options.subtitleLanguages,
+		"--embed-subs",
+		"--compat-options",
+		"no-keep-subs",
+	];
 }
 
 function metadataArgs(options: DownloadOptions): string[] {

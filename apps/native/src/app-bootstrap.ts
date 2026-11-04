@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Uniwind } from "uniwind";
 
 import { engine } from "./engine";
+import { useDownloadsStore } from "./store/downloads-store";
+import { waitForHydration } from "./store/hydration";
 import { downloadQueue } from "./store/queue";
 import { useSettingsStore } from "./store/settings-store";
 
@@ -17,6 +19,15 @@ export function useAppBootstrap(): void {
 		void engine.initialize().catch(() => {
 			// Initialization is retried lazily by every engine call, which reports the error.
 		});
-		return downloadQueue.start();
+		// Saved jobs and the saved concurrency limit must both be loaded before anything starts.
+		let stopQueue: (() => void) | undefined;
+		let isUnmounted = false;
+		void waitForHydration(useDownloadsStore, useSettingsStore).then(() => {
+			if (!isUnmounted) stopQueue = downloadQueue.start();
+		});
+		return () => {
+			isUnmounted = true;
+			stopQueue?.();
+		};
 	}, []);
 }
