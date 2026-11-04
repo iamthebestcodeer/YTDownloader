@@ -96,6 +96,7 @@ describe("playlist positions", () => {
 			entries: [
 				{ id: "a", url: "https://youtu.be/a" },
 				{ id: "gone" },
+				null,
 				{ id: "c", url: "https://youtu.be/c" },
 			],
 		});
@@ -103,6 +104,7 @@ describe("playlist positions", () => {
 		expect(info.kind === "playlist" && info.entries.map((entry) => entry.id)).toEqual([
 			"a",
 			"gone",
+			"",
 			"c",
 		]);
 	});

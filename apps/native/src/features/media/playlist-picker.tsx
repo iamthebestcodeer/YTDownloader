@@ -56,8 +56,8 @@ export function PlaylistPicker({ entries, selection, onChange }: PlaylistPickerP
 					);
 				})}
 				{hidden > 0 ? (
-					<Button variant="secondary" onPress={() => setVisibleCount(total)}>
-						{`Show ${hidden} more`}
+					<Button variant="secondary" onPress={() => setVisibleCount((count) => count + PAGE_SIZE)}>
+						{`Show ${Math.min(PAGE_SIZE, hidden)} more`}
 					</Button>
 				) : null}
 			</View>

@@ -85,11 +85,13 @@ function previewFiles(options: DownloadOptions): DownloadedFile[] {
 	const playlist = parseMediaInfo(JSON.stringify(playlistFixture), "");
 	const entries =
 		options.includePlaylist && playlist.kind === "playlist"
-			? playlist.entries.filter((_, index) => options.playlistItems?.includes(index + 1) ?? true)
-			: [parseMediaInfo(JSON.stringify(videoFixture), "")];
-	return entries.map((entry, index) => ({
-		uri: `preview://file/${index}`,
-		name: `${String(index + 1).padStart(3, "0")} - ${entry.title} [${entry.id}].${extension}`,
+			? playlist.entries
+					.map((entry, index) => ({ entry, position: index + 1 }))
+					.filter(({ position }) => options.playlistItems?.includes(position) ?? true)
+			: [{ entry: parseMediaInfo(JSON.stringify(videoFixture), ""), position: 1 }];
+	return entries.map(({ entry, position }) => ({
+		uri: `preview://file/${position}`,
+		name: `${String(position).padStart(3, "0")} - ${entry.title} [${entry.id}].${extension}`,
 		mimeType,
 		sizeBytes: PREVIEW_FILE_BYTES,
 	}));
