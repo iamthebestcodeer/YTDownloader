@@ -1,0 +1,74 @@
+{
+	"id": "big buck bunny",
+	"title": "big buck bunny",
+	"_type": "playlist",
+	"entries": [
+		{
+			"_type": "url",
+			"id": "aqz-KE-bpKQ",
+			"url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+			"title": "Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film",
+			"duration": 635,
+			"channel": "Blender",
+			"uploader": "Blender",
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/aqz-KE-bpKQ/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCo3CK7t20lDWpqrAxvyH0aIgPEpA",
+					"height": 202,
+					"width": 360
+				},
+				{
+					"url": "https://i.ytimg.com/vi/aqz-KE-bpKQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBHp9W1WijcZlxVt2CwU1wCT2Aejw",
+					"height": 404,
+					"width": 720
+				}
+			]
+		},
+		{
+			"_type": "url",
+			"id": "PJx173L9jWw",
+			"url": "https://www.youtube.com/watch?v=PJx173L9jWw",
+			"title": "Big Buck Bunny creative common Blender Foundation Short Film",
+			"duration": 10205,
+			"channel": "Miniaiza",
+			"uploader": "Miniaiza",
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/PJx173L9jWw/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAXo9DGb88kWDVoZk93MhNcKuO2cw",
+					"height": 202,
+					"width": 360
+				},
+				{
+					"url": "https://i.ytimg.com/vi/PJx173L9jWw/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDXhl6cBMU5t5t7s7O3h00Qy2bxpg",
+					"height": 404,
+					"width": 720
+				}
+			]
+		},
+		{
+			"_type": "url",
+			"id": "f7NwyBnIRTE",
+			"url": "https://www.youtube.com/watch?v=f7NwyBnIRTE",
+			"title": "Animated Short Film \"Big Buck Bunny\", 4K, Full Length",
+			"duration": 635,
+			"channel": "AnimalsReview",
+			"uploader": "AnimalsReview",
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/f7NwyBnIRTE/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC45CZB010xTUMHEtZzeVFKdt6e9A",
+					"height": 202,
+					"width": 360
+				},
+				{
+					"url": "https://i.ytimg.com/vi/f7NwyBnIRTE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBIHpw-qjLUfB3XqW0EJzWEhZJN7Q",
+					"height": 404,
+					"width": 720
+				}
+			]
+		}
+	],
+	"webpage_url": "ytsearch5:big buck bunny",
+	"extractor": "youtube:search",
+	"extractor_key": "YoutubeSearch",
+	"playlist_count": 5
+}

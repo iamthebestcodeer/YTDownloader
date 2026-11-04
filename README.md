@@ -77,8 +77,8 @@ engine with recorded yt-dlp output, since yt-dlp cannot run in a browser.
 
 Every push to `main` builds a signed APK and publishes it as a GitHub release
 (`.github/workflows/release.yml`). Signing uses these repository secrets: `KEYSTORE_BASE64`,
-`KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. Without them, the APK is signed with the
-debug key.
+`KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. Without them, nothing is published: the
+debug-signed APK is kept as a workflow artifact instead.
 
 ## License
 
