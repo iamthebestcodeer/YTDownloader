@@ -17,6 +17,8 @@ export type DownloadOptions = {
 	embedMetadata: boolean;
 	embedSubtitles: boolean;
 	subtitleLanguages: string;
+	/** 1-based positions of the playlist videos to download; all of them when absent. */
+	playlistItems?: readonly number[];
 };
 
 export type VideoSummary = {
@@ -37,6 +39,8 @@ export type VideoInfo = VideoSummary & {
 	kind: "video";
 	qualities: QualityOption[];
 	estimatedAudioBytes: number | null;
+	/** False when yt-dlp only got metadata (e.g. YouTube refused this client). */
+	hasMediaFormats: boolean;
 };
 
 export type PlaylistInfo = {

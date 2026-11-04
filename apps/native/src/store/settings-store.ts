@@ -8,7 +8,7 @@ import { persistentStorage } from "./storage";
 export type ThemePreference = "system" | "light" | "dark";
 
 /** Download options a user picks once and reuses; playlist inclusion is decided per link. */
-export type DefaultDownloadOptions = Omit<DownloadOptions, "includePlaylist">;
+export type DefaultDownloadOptions = Omit<DownloadOptions, "includePlaylist" | "playlistItems">;
 
 export const MAX_CONCURRENT_DOWNLOADS_LIMIT = 3;
 

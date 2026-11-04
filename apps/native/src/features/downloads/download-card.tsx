@@ -1,25 +1,33 @@
 import { Button, Card, Chip } from "heroui-native";
+import { useState } from "react";
 import { Text, View } from "react-native";
 
 import { overallProgress } from "@/src/domain/job";
-import type { DownloadJob } from "@/src/domain/types";
+import type { DownloadedFile, DownloadJob } from "@/src/domain/types";
 import { Icon, type IconName } from "@/src/ui/icon";
 import { ProgressBar } from "@/src/ui/progress-bar";
 import { Thumbnail } from "@/src/ui/thumbnail";
 
 import { qualityLabel } from "../download-options/choices";
+import { FileList } from "./file-list";
 import { describeJob, STATUS_APPEARANCE } from "./job-status";
 
 export type DownloadCardActions = {
 	onPause: (job: DownloadJob) => void;
 	onResume: (job: DownloadJob) => void;
 	onRemove: (job: DownloadJob) => void;
-	onOpen: (job: DownloadJob) => void;
+	onOpenFile: (file: DownloadedFile) => void;
 };
 
 type DownloadCardProps = DownloadCardActions & { job: DownloadJob };
 
+type JobActionsProps = DownloadCardProps & {
+	isShowingFiles: boolean;
+	onToggleFiles: () => void;
+};
+
 export function DownloadCard({ job, ...actions }: DownloadCardProps) {
+	const [isShowingFiles, setIsShowingFiles] = useState(false);
 	const status = STATUS_APPEARANCE[job.status];
 	const showProgress = job.status !== "completed" && job.status !== "failed";
 	return (
@@ -48,13 +56,29 @@ export function DownloadCard({ job, ...actions }: DownloadCardProps) {
 				<Text className="text-muted flex-1 text-xs" numberOfLines={2}>
 					{describeJob(job)}
 				</Text>
-				<JobActions job={job} {...actions} />
+				<JobActions
+					job={job}
+					{...actions}
+					isShowingFiles={isShowingFiles}
+					onToggleFiles={() => setIsShowingFiles((shown) => !shown)}
+				/>
 			</View>
+			{isShowingFiles && job.status === "completed" ? (
+				<FileList job={job} onOpenFile={actions.onOpenFile} />
+			) : null}
 		</Card>
 	);
 }
 
-function JobActions({ job, onPause, onResume, onRemove, onOpen }: DownloadCardProps) {
+function JobActions({
+	job,
+	onPause,
+	onResume,
+	onRemove,
+	onOpenFile,
+	isShowingFiles,
+	onToggleFiles,
+}: JobActionsProps) {
 	switch (job.status) {
 		case "queued":
 		case "downloading":
@@ -82,10 +106,14 @@ function JobActions({ job, onPause, onResume, onRemove, onOpen }: DownloadCardPr
 		case "completed":
 			return (
 				<>
-					<Button size="sm" variant="secondary" onPress={() => onOpen(job)}>
-						<Icon name="play-circle-outline" size={16} />
-						<Button.Label>Open</Button.Label>
-					</Button>
+					{job.files.length > 1 ? (
+						<Button size="sm" variant="secondary" onPress={onToggleFiles}>
+							<Icon name={isShowingFiles ? "chevron-up" : "list"} size={16} />
+							<Button.Label>{`Files · ${job.files.length}`}</Button.Label>
+						</Button>
+					) : (
+						<OpenButton file={job.files[0]} onOpenFile={onOpenFile} />
+					)}
 					<ActionButton
 						icon="trash-outline"
 						label="Remove from list"
@@ -94,6 +122,22 @@ function JobActions({ job, onPause, onResume, onRemove, onOpen }: DownloadCardPr
 				</>
 			);
 	}
+}
+
+function OpenButton({
+	file,
+	onOpenFile,
+}: {
+	file: DownloadedFile | undefined;
+	onOpenFile: (file: DownloadedFile) => void;
+}) {
+	if (!file) return null;
+	return (
+		<Button size="sm" variant="secondary" onPress={() => onOpenFile(file)}>
+			<Icon name="play-circle-outline" size={16} />
+			<Button.Label>Open</Button.Label>
+		</Button>
+	);
 }
 
 function ActionButton({

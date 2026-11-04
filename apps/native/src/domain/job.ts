@@ -1,4 +1,5 @@
-import type { DownloadJob, JobStatus } from "./types";
+import type { DownloadedFile, DownloadJob, JobStatus } from "./types";
+import { isYoutubeUrl } from "./url";
 
 const ACTIVE_STATUSES: ReadonlySet<JobStatus> = new Set(["queued", "downloading", "processing"]);
 const FINISHED_STATUSES: ReadonlySet<JobStatus> = new Set(["completed", "failed"]);
@@ -28,4 +29,18 @@ export function recoverAfterRestart(job: DownloadJob): DownloadJob {
 
 function clamp(value: number): number {
 	return Math.min(1, Math.max(0, value));
+}
+
+const VIDEO_ID_IN_FILE_NAME = /\[([A-Za-z0-9_-]{11})\]\.[^.]+$/;
+
+/** Files are saved as "<title> [<video id>].<ext>", so the id can be read back. */
+export function videoIdFromFileName(name: string): string | null {
+	return name.match(VIDEO_ID_IN_FILE_NAME)?.[1] ?? null;
+}
+
+/** The artwork for one downloaded file: its own YouTube thumbnail, else the job's. */
+export function thumbnailForFile(file: DownloadedFile, job: DownloadJob): string | null {
+	const videoId = videoIdFromFileName(file.name);
+	if (videoId && isYoutubeUrl(job.url)) return `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+	return job.thumbnailUrl;
 }

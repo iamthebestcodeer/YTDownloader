@@ -1,22 +1,23 @@
 import { Text, View } from "react-native";
 
-import type { MediaInfo } from "@/src/domain/types";
 import { Thumbnail } from "@/src/ui/thumbnail";
 
-export function MediaHeader({ info }: { info: MediaInfo }) {
-	const isPlaylist = info.kind === "playlist";
+import type { DownloadPreview } from "./download-plan";
+
+/** Shows exactly what is about to be downloaded: its artwork, title and channel. */
+export function MediaHeader({ preview }: { preview: DownloadPreview }) {
 	return (
 		<View className="gap-3">
 			<Thumbnail
-				uri={info.thumbnailUrl}
-				durationSeconds={isPlaylist ? null : info.durationSeconds}
-				badge={isPlaylist ? `${info.entries.length} videos` : undefined}
+				uri={preview.thumbnailUrl}
+				durationSeconds={preview.durationSeconds}
+				badge={preview.badge}
 			/>
 			<View className="gap-1">
 				<Text className="text-foreground text-xl font-semibold" selectable>
-					{info.title}
+					{preview.title}
 				</Text>
-				{info.channel ? <Text className="text-muted text-sm">{info.channel}</Text> : null}
+				{preview.channel ? <Text className="text-muted text-sm">{preview.channel}</Text> : null}
 			</View>
 		</View>
 	);
