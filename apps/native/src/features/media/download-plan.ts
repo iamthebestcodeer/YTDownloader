@@ -50,7 +50,9 @@ export function planDownload(
 			preview: {
 				title: entry?.title ?? info.title,
 				channel: entry?.channel ?? info.channel,
-				thumbnailUrl: entry?.thumbnailUrl ?? info.thumbnailUrl,
+				thumbnailUrl:
+					entry?.thumbnailUrl ??
+					(videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : null),
 				durationSeconds: entry?.durationSeconds ?? null,
 			},
 			includePlaylist: false,

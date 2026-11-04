@@ -36,7 +36,10 @@ export function parseMediaInfo(json: string, requestedUrl: string): MediaInfo {
 
 /** Parses the output of `yt-dlp --dump-single-json --flat-playlist ytsearchN:<query>`. */
 export function parseSearchResults(json: string): VideoSummary[] {
-	return entriesOf(parseObject(json));
+	return arrayOf(parseObject(json).entries)
+		.filter(isObject)
+		.map((entry) => toSummary(entry, ""))
+		.filter((entry) => entry.url !== "");
 }
 
 /** Maps a frame size to the standard quality it belongs to, e.g. 1920x1080 → 1080. */
@@ -60,11 +63,15 @@ function toVideoInfo(raw: RawObject, requestedUrl: string): VideoInfo {
 		...toSummary(raw, requestedUrl),
 		qualities: qualityOptionsOf(formats, estimatedAudioBytes),
 		estimatedAudioBytes,
+		hasMediaFormats: formats.some((format) => hasVideo(format) || hasAudio(format)),
 	};
 }
 
 function toPlaylistInfo(raw: RawObject, requestedUrl: string): PlaylistInfo {
-	const entries = entriesOf(raw);
+	// Every entry is kept, even without a link, so list positions match yt-dlp's playlist index.
+	const entries = arrayOf(raw.entries)
+		.filter(isObject)
+		.map((entry) => toSummary(entry, ""));
 	return {
 		kind: "playlist",
 		id: stringOf(raw.id) ?? requestedUrl,
@@ -74,13 +81,6 @@ function toPlaylistInfo(raw: RawObject, requestedUrl: string): PlaylistInfo {
 		thumbnailUrl: largestThumbnailOf(raw) ?? entries[0]?.thumbnailUrl ?? null,
 		entries,
 	};
-}
-
-function entriesOf(raw: RawObject): VideoSummary[] {
-	return arrayOf(raw.entries)
-		.filter(isObject)
-		.map((entry) => toSummary(entry, ""))
-		.filter((entry) => entry.url !== "");
 }
 
 function toSummary(raw: RawObject, fallbackUrl: string): VideoSummary {

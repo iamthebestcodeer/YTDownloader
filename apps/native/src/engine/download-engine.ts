@@ -36,3 +36,10 @@ export class UnsupportedPlatformError extends Error {
 		this.name = "UnsupportedPlatformError";
 	}
 }
+
+export class DownloadStoppedError extends Error {
+	constructor() {
+		super("The download was stopped");
+		this.name = "DownloadStoppedError";
+	}
+}

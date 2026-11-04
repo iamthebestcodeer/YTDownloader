@@ -5,13 +5,15 @@ import type { MediaInfo } from "@/src/domain/types";
 import { isYoutubeUrl } from "@/src/domain/url";
 
 import { ClientRotation } from "./client-rotation";
-import type { DownloadEngine } from "./download-engine";
+import { type DownloadEngine, DownloadStoppedError } from "./download-engine";
 
 const SEARCH_RESULT_LIMIT = 20;
 
 /** Runs yt-dlp on the device through the local `YtDlp` Expo module. */
 export function createNativeEngine(native: YtDlpNativeModule): DownloadEngine {
 	const rotation = new ClientRotation();
+	/** Jobs the user stopped; a stop between two client attempts must not start the next one. */
+	const stopped = new Set<string>();
 
 	/** YouTube calls rotate through player clients; other sites run once as-is. */
 	const run = <Result>(
@@ -41,12 +43,18 @@ export function createNativeEngine(native: YtDlpNativeModule): DownloadEngine {
 			);
 		},
 
-		download: ({ jobId, url, options }) =>
-			run(url, (clientArgs) =>
-				native.startDownload(jobId, url, [...buildDownloadArgs(options), ...clientArgs]),
-			),
+		download: ({ jobId, url, options }) => {
+			stopped.delete(jobId);
+			return run(url, (clientArgs) => {
+				if (stopped.has(jobId)) return Promise.reject(new DownloadStoppedError());
+				return native.startDownload(jobId, url, [...buildDownloadArgs(options), ...clientArgs]);
+			}).finally(() => stopped.delete(jobId));
+		},
 
-		stop: (jobId) => void native.stopDownload(jobId),
+		stop: (jobId) => {
+			stopped.add(jobId);
+			native.stopDownload(jobId);
+		},
 		discard: (jobId) => void native.discardDownload(jobId),
 		openFile: (file) => native.openFile(file.uri, file.mimeType),
 
@@ -57,7 +65,7 @@ export function createNativeEngine(native: YtDlpNativeModule): DownloadEngine {
 	};
 }
 
-/** A client that only returns metadata leaves nothing but "Best" to choose from. */
+/** A client that only returns metadata gives a preview but nothing to download. */
 function hasDownloadableFormats(info: MediaInfo): boolean {
-	return info.kind === "playlist" || info.qualities.length > 1;
+	return info.kind === "playlist" || info.hasMediaFormats;
 }

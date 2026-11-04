@@ -30,6 +30,15 @@ describe("parseMediaInfo for a single video", () => {
 		});
 	});
 
+	test("tells real media formats apart from metadata-only results", () => {
+		const parse = (formats: unknown[]) =>
+			parseMediaInfo(JSON.stringify({ id: "x", formats }), VIDEO_URL);
+		const storyboardsOnly = parse([{ format_id: "sb0", vcodec: "none", acodec: "none" }]);
+		const audioOnly = parse([{ format_id: "140", vcodec: "none", acodec: "mp4a.40.2" }]);
+		expect(storyboardsOnly.kind === "video" && storyboardsOnly.hasMediaFormats).toBe(false);
+		expect(audioOnly.kind === "video" && audioOnly.hasMediaFormats).toBe(true);
+	});
+
 	test("reads the basic metadata", () => {
 		expect(info).toMatchObject({
 			kind: "video",
@@ -77,6 +86,25 @@ describe("parseMediaInfo for a playlist", () => {
 		expect(info.entries).toHaveLength(3);
 		expect(info.entries[0]?.url).toStartWith("https://www.youtube.com/watch?v=");
 		expect(info.thumbnailUrl).toStartWith("https://");
+	});
+});
+
+describe("playlist positions", () => {
+	test("keeps entries without a link so positions match yt-dlp's playlist index", () => {
+		const json = JSON.stringify({
+			_type: "playlist",
+			entries: [
+				{ id: "a", url: "https://youtu.be/a" },
+				{ id: "gone" },
+				{ id: "c", url: "https://youtu.be/c" },
+			],
+		});
+		const info = parseMediaInfo(json, "https://www.youtube.com/playlist?list=PL");
+		expect(info.kind === "playlist" && info.entries.map((entry) => entry.id)).toEqual([
+			"a",
+			"gone",
+			"c",
+		]);
 	});
 });
 

@@ -39,6 +39,8 @@ export type VideoInfo = VideoSummary & {
 	kind: "video";
 	qualities: QualityOption[];
 	estimatedAudioBytes: number | null;
+	/** False when yt-dlp only got metadata (e.g. YouTube refused this client). */
+	hasMediaFormats: boolean;
 };
 
 export type PlaylistInfo = {
