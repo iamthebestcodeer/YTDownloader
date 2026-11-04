@@ -11,6 +11,8 @@ import { useSettingsStore } from "./settings-store";
  */
 export class DownloadQueue {
 	private readonly running = new Set<string>();
+	/** Jobs stopped by the user; the engine rejects them, which is not a failure. */
+	private readonly stopRequested = new Set<string>();
 
 	constructor(private readonly engine: DownloadEngine) {}
 
@@ -29,7 +31,7 @@ export class DownloadQueue {
 
 	pause(id: string): void {
 		useDownloadsStore.getState().pause(id);
-		this.engine.stop(id);
+		this.stop(id);
 	}
 
 	/** Puts a paused or failed job back in line; partial files are reused. */
@@ -40,8 +42,13 @@ export class DownloadQueue {
 	/** Stops the job if needed and forgets it, including any partial files. */
 	remove(id: string): void {
 		useDownloadsStore.getState().remove(id);
-		this.engine.stop(id);
+		this.stop(id);
 		this.engine.discard(id);
+	}
+
+	private stop(id: string): void {
+		if (this.running.has(id)) this.stopRequested.add(id);
+		this.engine.stop(id);
 	}
 
 	private pump(): void {
@@ -68,18 +75,13 @@ export class DownloadQueue {
 			});
 			store.complete(job.id, files);
 		} catch (error) {
-			if (this.wasInterruptedOnPurpose(job.id)) return;
+			if (this.stopRequested.has(job.id)) return;
 			store.fail(job.id, summarizeError(error instanceof Error ? error.message : String(error)));
 		} finally {
 			this.running.delete(job.id);
+			this.stopRequested.delete(job.id);
 			this.pump();
 		}
-	}
-
-	/** Pausing or removing a job makes the engine reject; that is not a failure. */
-	private wasInterruptedOnPurpose(id: string): boolean {
-		const job = findJob(id);
-		return !job || job.status === "paused";
 	}
 
 	private handleProgress({ jobId, percent, etaSeconds, line }: EngineProgress): void {

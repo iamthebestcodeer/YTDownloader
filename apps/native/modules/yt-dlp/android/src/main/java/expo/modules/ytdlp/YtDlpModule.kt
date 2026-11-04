@@ -9,6 +9,8 @@ import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -70,8 +72,9 @@ class YtDlpModule : Module() {
     markActive(jobId)
     try {
       engine.download(jobId, url, arguments, workingDirectory) { progress -> emitProgress(jobId, progress) }
-      val files = publisher.publishDirectory(workingDirectory)
-      workingDirectory.deleteRecursively()
+      val files = withContext(Dispatchers.IO) {
+        publisher.publishDirectory(workingDirectory).also { workingDirectory.deleteRecursively() }
+      }
       return files.map { it.toJs() }
     } catch (error: YoutubeDL.CanceledException) {
       throw DownloadCancelledException()

@@ -80,6 +80,7 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("DownloadQueue", () => {
 	let fake: ReturnType<typeof createFakeEngine>;
+	let queue: InstanceType<typeof DownloadQueue>;
 	let stop: () => void;
 
 	beforeEach(() => {
@@ -87,7 +88,8 @@ describe("DownloadQueue", () => {
 		useDownloadsStore.setState({ jobs: [] });
 		useSettingsStore.setState({ maxConcurrentDownloads: 2 });
 		fake = createFakeEngine();
-		stop = new DownloadQueue(fake.engine).start();
+		queue = new DownloadQueue(fake.engine);
+		stop = queue.start();
 	});
 
 	test("runs at most the allowed number of jobs, oldest first, each only once", async () => {
@@ -146,7 +148,6 @@ describe("DownloadQueue", () => {
 	});
 
 	test("pausing stops the engine without marking the job failed, and resume restarts it", async () => {
-		const queue = new DownloadQueue(fake.engine);
 		const id = enqueue("pausable");
 		queue.pause(id);
 		await flush();
@@ -158,8 +159,23 @@ describe("DownloadQueue", () => {
 		expect(statusOf(id)).toBe("downloading");
 	});
 
+	test("resuming right after pausing restarts the job instead of failing it", async () => {
+		const id = enqueue("quick");
+		const stopEngine = fake.engine.stop;
+		fake.engine.stop = (jobId) => void fake.stopped.push(jobId); // the process takes a moment to die
+		queue.pause(id);
+		queue.resume(id);
+		expect(statusOf(id)).toBe("queued");
+
+		fake.failWith(id, "ERR_DOWNLOAD_CANCELLED");
+		await flush();
+		fake.engine.stop = stopEngine;
+
+		expect(statusOf(id)).toBe("downloading");
+		expect(fake.started).toEqual([id, id]);
+	});
+
 	test("removing a job stops it and deletes its partial files", async () => {
-		const queue = new DownloadQueue(fake.engine);
 		const id = enqueue("unwanted");
 		queue.remove(id);
 		await flush();

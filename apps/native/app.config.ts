@@ -1,7 +1,7 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
 const APP_NAME = "YTDownloader";
-/** Same id as the original Kotlin app so installs upgrade in place. */
+/** Same id as the original Kotlin app, so builds signed with its key upgrade existing installs. */
 const ANDROID_PACKAGE = "com.aistudio.ytdownloader.abx";
 
 /** CI passes the run number so every release has a higher version code than the last. */
